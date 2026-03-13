@@ -1,4 +1,4 @@
-package core.basesyntax;
+package core.basesyntax.strategy.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,7 +7,6 @@ import core.basesyntax.dao.FruitDao;
 import core.basesyntax.dao.FruitDaoImpl;
 import core.basesyntax.db.Storage;
 import core.basesyntax.model.FruitTransaction;
-import core.basesyntax.strategy.impl.PurchaseOperationHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,13 +17,12 @@ class PurchaseOperationHandlerTest {
 
     @BeforeEach
     void setUp() {
-        Storage.clear();
         fruitDao = new FruitDaoImpl();
         handler = new PurchaseOperationHandler(fruitDao);
     }
 
     @Test
-    void handle_EnoughFruit_Ok() {
+    void handle_enoughFruit_ok() {
         fruitDao.add("apple", 10);
         FruitTransaction transaction = new FruitTransaction(
                 FruitTransaction.Operation.PURCHASE, "apple", 4);
@@ -35,15 +33,21 @@ class PurchaseOperationHandlerTest {
     }
 
     @Test
-    void handle_NotEnoughFruit_throwsException() {
+    void handle_notEnoughFruit_throwsException() {
         fruitDao.add("banana", 5);
         FruitTransaction transaction = new FruitTransaction(
                 FruitTransaction.Operation.PURCHASE, "banana", 10);
 
-        assertThrows(RuntimeException.class,
-                () -> handler.handle(transaction));
+        assertThrows(RuntimeException.class, () -> handler.handle(transaction));
     }
-    // сделал
+
+    @Test
+    void handle_fruitNotFound_throwsException() {
+        FruitTransaction transaction = new FruitTransaction(
+                FruitTransaction.Operation.PURCHASE, "nonExistent", 5);
+
+        assertThrows(RuntimeException.class, () -> handler.handle(transaction));
+    }
 
     @AfterEach
     void tearDown() {
